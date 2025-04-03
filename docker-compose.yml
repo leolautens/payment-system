@@ -1,0 +1,30 @@
+version: '3.8'
+services:
+  # Serviço de banco de dados MySQL
+  mysql:
+    # Imagem oficial do MySQL
+    image: mysql:8.0
+
+    # Mapeamento de portas: porta do host:porta do container
+    ports:
+      - "3306:3306"
+
+    # Variáveis de ambiente para configuração do MySQL
+    environment:
+      # Senha root do MySQL
+      MYSQL_ROOT_PASSWORD: password123
+
+      # Nome do banco de dados inicial
+      MYSQL_DATABASE: payments
+
+      # Usuário adicional (opcional)
+      MYSQL_USER: dope
+      MYSQL_PASSWORD: password123
+
+    # Persistência de dados - volume para manter dados do MySQL
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+# Definição do volume para persistência de dados
+volumes:
+  mysql-data:
