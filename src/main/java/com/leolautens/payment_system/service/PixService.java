@@ -1,5 +1,8 @@
 package com.leolautens.payment_system.service;
 
+import java.awt.*;
+import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.util.HashMap;
 
 import com.leolautens.payment_system.dto.PixChargeRequest;
@@ -12,6 +15,8 @@ import br.com.efi.efisdk.EfiPay;
 import br.com.efi.efisdk.exceptions.EfiPayException;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Value;
+
+import javax.imageio.ImageIO;
 
 @Service
 
@@ -26,8 +31,7 @@ public class PixService {
 
     public JSONObject pixCreateEvp() {
 
-        Credentials credentials = new Credentials();
-        JSONObject options = recoverJsonObject(credentials);
+        JSONObject options = recoverJsonObject();
 
         try {
             EfiPay efi = new EfiPay(options);
@@ -45,9 +49,8 @@ public class PixService {
     }
 
     public JSONObject listEVP() {
-        Credentials credentials = new Credentials();
 
-        JSONObject options = this.recoverJsonObject(credentials);
+        JSONObject options = this.recoverJsonObject();
 
         try {
             EfiPay efi = new EfiPay(options);
@@ -66,11 +69,10 @@ public class PixService {
 
     public JSONObject pixCreateCharge(PixChargeRequest pixChargeRequest) {
 
-        Credentials credentials = new Credentials();
-        JSONObject options = recoverJsonObject(credentials);
+        JSONObject options = recoverJsonObject();
 
         HashMap<String, String> params = new HashMap<String, String>();
-        params.put("txid", "2908c0c97ea847e78e8849634473c1f1");
+        params.put("txid", "2308c0c97ea847e78e8849634473c1f1");
 
         JSONObject body = new JSONObject();
         body.put("calendario", new JSONObject().put("expiracao", 900));
@@ -86,7 +88,10 @@ public class PixService {
         try {
             EfiPay efi = new EfiPay(options);
             JSONObject response = efi.call("pixCreateCharge", params, body);
-            System.out.println(response);
+
+            int idFromJson = response.getJSONObject("loc").getInt("id");
+            generateQRCode(String.valueOf(idFromJson));
+
             return response;
         }catch (EfiPayException e){
             System.out.println(e.getError());
@@ -98,7 +103,35 @@ public class PixService {
         return null;
     }
 
-    private JSONObject recoverJsonObject(Credentials credentials) {
+    private void generateQRCode(String id) {
+
+        JSONObject options = recoverJsonObject();
+
+        HashMap<String, String> params = new HashMap<String, String>();
+        params.put("id", id);
+
+        try {
+            EfiPay efi = new EfiPay(options);
+            JSONObject response = efi.call("pixGenerateQRCode", params, new JSONObject());
+
+            System.out.println(response);
+
+            File outputfile = new File("qrCodeImage.png");
+            ImageIO.write(ImageIO.read(new ByteArrayInputStream(javax.xml.bind.DatatypeConverter.parseBase64Binary(((String) response.get("imagemQrcode")).split(",")[1]))), "png", outputfile);
+            Desktop desktop = Desktop.getDesktop();
+            desktop.open(outputfile);
+
+        } catch (EfiPayException e) {
+            System.out.println(e.getError());
+            System.out.println(e.getErrorDescription());
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    private JSONObject recoverJsonObject() {
+
+        Credentials credentials = new Credentials();
         JSONObject options = new JSONObject();
         options.put("client_id", clientId);
         options.put("client_secret", clientSecret);
