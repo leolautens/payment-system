@@ -8,11 +8,13 @@ import jakarta.validation.constraints.NotNull;
 public record UserRequest(
         @NotNull(message = "not null") @NotBlank(message = "not empty") String name,
         @NotNull(message = "not null") @NotBlank(message = "not empty") @Email String email,
-        @NotNull(message = "not null") @NotBlank(message = "not empty") String password)
+        @NotNull(message = "not null") @NotBlank(message = "not empty") String password,
+        @NotNull(message = "not null") @NotBlank(message = "not empty") String role)
+
 {
 
     public User toModel() {
-        return new User(name, email, password);
+        return new User(name, email, password, role);
     }
 
 }
