@@ -67,7 +67,7 @@ public class PixService {
         return null;
     }
 
-    public JSONObject pixCreateCharge(PixChargeRequest pixChargeRequest) {
+    public String pixCreateCharge(PixChargeRequest pixChargeRequest) {
 
         JSONObject options = recoverJsonObject();
         String randomTxid = java.util.UUID.randomUUID().toString().replaceAll("-", "");
@@ -90,9 +90,12 @@ public class PixService {
             JSONObject response = efi.call("pixCreateCharge", params, body);
 
             int idFromJson = response.getJSONObject("loc").getInt("id");
-            generateQRCode(String.valueOf(idFromJson));
+            String pixQrCode = generateQRCode(String.valueOf(idFromJson));
 
-            return response;
+            System.out.println("----- PixChargeResponse -----");
+            System.out.println(response);
+
+            return pixQrCode;
         }catch (EfiPayException e){
             System.out.println(e.getError());
             System.out.println(e.getErrorDescription());
@@ -103,7 +106,7 @@ public class PixService {
         return null;
     }
 
-    private void generateQRCode(String id) {
+    private String generateQRCode(String id) {
 
         JSONObject options = recoverJsonObject();
 
@@ -114,14 +117,17 @@ public class PixService {
             EfiPay efi = new EfiPay(options);
             JSONObject response = efi.call("pixGenerateQRCode", params, new JSONObject());
 
-            System.out.println(response);
+            System.out.println("----- QR Code -----");
+            System.out.println(response.get("linkVisualizacao"));
 
-            File outputfile = new File("qrCodeImage.png");
-            ImageIO.write(ImageIO.read(new ByteArrayInputStream(javax.xml.bind.DatatypeConverter
-                    .parseBase64Binary(((String) response.get("imagemQrcode"))
-                            .split(",")[1]))), "png", outputfile);
-            Desktop desktop = Desktop.getDesktop();
-            desktop.open(outputfile);
+            return response.get("linkVisualizacao").toString();
+
+//            File outputfile = new File("qrCodeImage.png");
+//            ImageIO.write(ImageIO.read(new ByteArrayInputStream(javax.xml.bind.DatatypeConverter
+//                    .parseBase64Binary(((String) response.get("imagemQrcode"))
+//                            .split(",")[1]))), "png", outputfile);
+//            Desktop desktop = Desktop.getDesktop();
+//            desktop.open(outputfile);
 
         } catch (EfiPayException e) {
             System.out.println(e.getError());
@@ -129,6 +135,7 @@ public class PixService {
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
+        return null;
     }
 
     private JSONObject recoverJsonObject() {

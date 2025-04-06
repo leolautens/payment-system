@@ -26,10 +26,8 @@ public class PixController {
 
     @PostMapping("/createPix")
     public ResponseEntity pixCreateCharge(@RequestBody PixChargeRequest pixChargeRequest) {
-        JSONObject response = this.pixService.pixCreateCharge(pixChargeRequest);
-        return ResponseEntity.ok()
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(response.toString());
+        String response = this.pixService.pixCreateCharge(pixChargeRequest);
+        return ResponseEntity.ok().body(response);
     }
 
     @GetMapping("/listEvp")
