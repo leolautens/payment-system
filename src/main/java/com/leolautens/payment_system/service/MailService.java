@@ -13,7 +13,7 @@ import java.io.UnsupportedEncodingException;
 
 public class MailService {
 
-    private JavaMailSender mailSender;
+    private final JavaMailSender mailSender;
 
     private String verifyUrl = "http://localhost:8080/api/v1/users/verify?code=";
 

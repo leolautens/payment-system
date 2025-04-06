@@ -70,20 +70,20 @@ public class PixService {
     public JSONObject pixCreateCharge(PixChargeRequest pixChargeRequest) {
 
         JSONObject options = recoverJsonObject();
-
+        String randomTxid = java.util.UUID.randomUUID().toString().replaceAll("-", "");
         HashMap<String, String> params = new HashMap<String, String>();
-        params.put("txid", "2308c0c97ea847e78e8849634473c1f1");
+        params.put("txid", randomTxid);
 
         JSONObject body = new JSONObject();
         body.put("calendario", new JSONObject().put("expiracao", 900));
-        body.put("devedor", new JSONObject().put("cpf", "12345678909").put("nome", "Francisco da Silva"));
+        //body.put("devedor", new JSONObject().put("cpf", "12345678909").put("nome", "Francisco da Silva"));
         body.put("valor", new JSONObject().put("original", pixChargeRequest.value()));
         body.put("chave", pixChargeRequest.key());
 
-        JSONArray infoAdicionais = new JSONArray();
-        infoAdicionais.put(new JSONObject().put("nome", "Campo 1").put("valor", "Informação Adicional1 do PSP-Recebedor"));
-        infoAdicionais.put(new JSONObject().put("nome", "Campo 2").put("valor", "Informação Adicional2 do PSP-Recebedor"));
-        body.put("infoAdicionais", infoAdicionais);
+//        JSONArray infoAdicionais = new JSONArray();
+//        infoAdicionais.put(new JSONObject().put("nome", "Campo 1").put("valor", "Informação Adicional1 do PSP-Recebedor"));
+//        infoAdicionais.put(new JSONObject().put("nome", "Campo 2").put("valor", "Informação Adicional2 do PSP-Recebedor"));
+//        body.put("infoAdicionais", infoAdicionais);
 
         try {
             EfiPay efi = new EfiPay(options);
@@ -117,7 +117,9 @@ public class PixService {
             System.out.println(response);
 
             File outputfile = new File("qrCodeImage.png");
-            ImageIO.write(ImageIO.read(new ByteArrayInputStream(javax.xml.bind.DatatypeConverter.parseBase64Binary(((String) response.get("imagemQrcode")).split(",")[1]))), "png", outputfile);
+            ImageIO.write(ImageIO.read(new ByteArrayInputStream(javax.xml.bind.DatatypeConverter
+                    .parseBase64Binary(((String) response.get("imagemQrcode"))
+                            .split(",")[1]))), "png", outputfile);
             Desktop desktop = Desktop.getDesktop();
             desktop.open(outputfile);
 
